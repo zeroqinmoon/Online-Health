@@ -1,36 +1,90 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0f1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Health Dashboard</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhlYWx0aCBEYXNoYm9hcmQiLAogICJzaG9ydF9uYW1lIjogIkhlYWx0aCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYxMTE3IiwKICAidGhlbWVfY29sb3IiOiAiIzBlYThlZSIKfQ==">
+    <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --surface: #1c1c1e;
-            --surface2: #252527;
-            --surface3: #2c2c2e;
-            --text: #ffffff;
-            --text2: #b0b0b5;
-            --text3: #6e6e73;
-            --green: #30d158;
-            --green-bg: #1a3a24;
-            --blue: #0a84ff;
-            --blue-bg: #1a2e45;
-            --orange: #ff9f0a;
-            --orange-bg: #3a2e1a;
-            --purple: #bf5af2;
-            --purple-bg: #2e1a3a;
-            --red: #ff453a;
-            --red-bg: #3a1a1a;
-            --teal: #64d2ff;
-            --teal-bg: #1a2e35;
-            --radius: 22px;
-            --radius-sm: 14px;
-            --radius-xs: 10px;
+            --bg: #0f1117;
+            --surface: #1a1d26;
+            --surface2: #232733;
+            --surface3: #2d3240;
+            --text: #eef0f6;
+            --text2: #a0a5b5;
+            --text3: #6b7084;
+            --green: #0eea8e;
+            --blue: #3b9eff;
+            --orange: #ffa94d;
+            --purple: #b98eff;
+            --red: #ff5e5e;
+            --teal: #5eeadb;
+            --gold: #ffd43b;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --border: rgba(255, 255, 255, 0.06);
+            --card-bg: linear-gradient(145deg, #1a1d26 0%, #232733 100%);
+            --radius: 24px;
+            --radius-sm: 16px;
+            --radius-xs: 12px;
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --gradient-header: linear-gradient(135deg, #0eea8e 0%, #3b9eff 100%);
+            --input-bg: #1a1d26;
+            --input-border: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] {
+            --bg: #f5f7fa;
+            --surface: #ffffff;
+            --surface2: #f0f2f5;
+            --surface3: #e4e8ee;
+            --text: #1a1d2e;
+            --text2: #5a6072;
+            --text3: #9095a8;
+            --green: #0caa6e;
+            --blue: #2b7de9;
+            --orange: #e88930;
+            --purple: #8c5ce5;
+            --red: #e04848;
+            --teal: #1fad9f;
+            --gold: #d4a017;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --border: rgba(0, 0, 0, 0.06);
+            --card-bg: #ffffff;
+            --gradient-header: linear-gradient(135deg, #0caa6e 0%, #2b7de9 100%);
+            --input-bg: #f0f2f5;
+            --input-border: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="amoled"] {
+            --bg: #000000;
+            --surface: #0a0a0a;
+            --surface2: #121212;
+            --surface3: #1c1c1c;
+            --text: #ffffff;
+            --text2: #b0b0b0;
+            --text3: #6e6e6e;
+            --green: #00e676;
+            --blue: #448aff;
+            --orange: #ff9100;
+            --purple: #d500f9;
+            --red: #ff1744;
+            --teal: #1de9b6;
+            --gold: #ffd600;
+            --shadow: 0 4px 24px rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.08);
+            --card-bg: #0a0a0a;
+            --gradient-header: linear-gradient(135deg, #00e676 0%, #448aff 100%);
+            --input-bg: #121212;
+            --input-border: rgba(255, 255, 255, 0.1);
         }
 
         * {
@@ -38,38 +92,39 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: var(--font);
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            padding-bottom: 100px;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             -webkit-user-select: none;
             overflow-x: hidden;
-            padding-bottom: 40px;
+            transition: background 0.4s, color 0.4s;
+            display: flex;
+            flex-direction: column;
         }
-
-        /* ===== HEADER ===== */
         .header {
-            background: var(--bg);
-            padding: 16px 20px 10px;
+            background: var(--surface);
+            padding: 14px 20px;
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid var(--border);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+            transition: background 0.4s;
         }
         .header-inner {
-            max-width: 1100px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
             flex-wrap: wrap;
+            gap: 12px;
         }
         .header-brand {
             display: flex;
@@ -77,369 +132,523 @@
             gap: 10px;
         }
         .header-logo {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #30d158, #0a84ff);
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
+            background: var(--gradient-header);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 800;
             color: #fff;
-            letter-spacing: -1px;
         }
         .header-title {
-            font-size: 1.3rem;
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
             font-weight: 700;
             letter-spacing: -0.3px;
             color: var(--text);
         }
-        .date-nav {
+        .header-actions {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: var(--surface);
-            border-radius: 30px;
-            padding: 6px 6px 6px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .date-nav {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface2);
+            border-radius: 40px;
+            padding: 4px 6px 4px 14px;
+            border: 1px solid var(--border);
         }
         .date-nav span {
-            font-size: 0.9rem;
+            font-size: clamp(0.75rem, 1.5vw, 0.9rem);
             font-weight: 500;
-            color: var(--text);
             white-space: nowrap;
-            min-width: 110px;
+            min-width: 90px;
             text-align: center;
-        }
-        .date-nav .today-badge {
-            font-size: 0.7rem;
-            background: var(--green);
-            color: #000;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-weight: 700;
-            margin-left: 2px;
-            letter-spacing: 0.3px;
+            color: var(--text);
         }
         .btn-icon {
             width: 34px;
             height: 34px;
             border-radius: 50%;
             border: none;
-            background: var(--surface2);
+            background: var(--surface3);
             color: var(--text);
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: var(--transition);
-            flex-shrink: 0;
         }
         .btn-icon:hover {
-            background: var(--surface3);
+            background: var(--surface2);
             transform: scale(1.05);
-        }
-        .btn-icon:active {
-            transform: scale(0.92);
-            opacity: 0.8;
         }
         .btn-today {
             background: var(--surface2);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 7px 14px;
+            padding: 6px 14px;
             color: var(--text);
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 600;
             transition: var(--transition);
-            white-space: nowrap;
         }
-        .btn-today:hover {
+        .today-badge {
+            font-size: 0.7rem;
+            background: var(--green);
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-left: 4px;
+        }
+        .theme-toggle {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 6px;
+            display: flex;
+            gap: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .theme-toggle span {
+            font-size: 1.2rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        .theme-toggle span.active {
             background: var(--surface3);
         }
-
-        /* ===== MAIN CONTAINER ===== */
         .main-container {
-            max-width: 1100px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 18px 16px 30px;
+            padding: clamp(12px, 2vw, 24px) clamp(12px, 2vw, 24px) 40px;
+            width: 100%;
+            flex: 1;
         }
-
-        /* ===== CARDS GRID ===== */
+        .section-page {
+            display: none;
+            animation: fadeSlide 0.4s ease;
+        }
+        .section-page.active {
+            display: block;
+        }
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .gamification-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: clamp(8px, 1.5vw, 16px);
+            margin-bottom: 20px;
+        }
+        .gamification-card {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            padding: clamp(12px, 2vw, 18px);
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .level-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--orange), var(--gold));
+            color: #000;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: clamp(0.85rem, 1.5vw, 1rem);
+        }
+        .xp-bar {
+            width: 100%;
+            height: 8px;
+            border-radius: 10px;
+            background: var(--surface2);
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .xp-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--orange), var(--gold));
+            transition: width 0.6s;
+        }
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 14px;
-            align-items: stretch;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: clamp(10px, 1.5vw, 16px);
+            margin-bottom: 20px;
         }
-
-        @media (min-width: 900px) {
+        @media(min-width: 1400px) {
             .cards-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
-            }
-            .card-circle-card {
-                grid-row: span 1;
-            }
-            .card-sono {
-                grid-column: span 1;
+                grid-template-columns: repeat(5, 1fr);
             }
         }
-        @media (min-width: 700px) and (max-width: 899px) {
+        @media(min-width: 900px) and (max-width: 1399px) {
+            .cards-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+        @media(max-width: 600px) {
             .cards-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 14px;
+                gap: 8px;
+            }
+            .gamification-row {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
-        @media (max-width: 699px) {
-            .cards-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-        }
-
-        /* ===== CARD BASE ===== */
         .card {
-            background: var(--surface);
+            background: var(--card-bg);
             border-radius: var(--radius);
-            padding: 20px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: var(--transition);
+            padding: clamp(14px, 2vw, 20px) clamp(10px, 1.5vw, 16px);
+            border: 1px solid var(--border);
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
+            transition: var(--transition);
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            min-height: 180px;
+            gap: 8px;
+            position: relative;
             box-shadow: var(--shadow);
         }
         .card:hover {
-            border-color: rgba(255, 255, 255, 0.12);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            transform: translateY(-4px);
+            border-color: var(--blue);
         }
         .card:active {
-            transform: scale(0.98);
-            transition: 0.1s;
+            transform: scale(0.97);
         }
-        .card-header-row {
+        .card-icon-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-        .card-icon {
+        .card-icon-sm {
             width: 40px;
             height: 40px;
-            border-radius: 50%;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.3rem;
-            flex-shrink: 0;
-        }
-        .card-icon.green {
-            background: var(--green-bg);
-        }
-        .card-icon.blue {
-            background: var(--blue-bg);
-        }
-        .card-icon.orange {
-            background: var(--orange-bg);
-        }
-        .card-icon.teal {
-            background: var(--teal-bg);
-        }
-        .card-icon.purple {
-            background: var(--purple-bg);
-        }
-        .card-label {
-            font-size: 0.85rem;
-            color: var(--text2);
-            font-weight: 500;
-            letter-spacing: 0.1px;
+            background: var(--surface2);
         }
         .card-value {
-            font-size: 2rem;
+            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
             font-weight: 700;
             letter-spacing: -0.5px;
             line-height: 1;
         }
-        .card-value.green {
-            color: var(--green);
-        }
-        .card-value.blue {
-            color: var(--blue);
-        }
-        .card-value.orange {
-            color: var(--orange);
-        }
-        .card-value.teal {
-            color: var(--teal);
-        }
-        .card-value.purple {
-            color: var(--purple);
+        .card-label {
+            font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+            color: var(--text2);
+            font-weight: 500;
         }
         .card-sub {
-            font-size: 0.78rem;
+            font-size: clamp(0.65rem, 1vw, 0.75rem);
             color: var(--text3);
-            font-weight: 400;
         }
-        .card-sub .meta-reached {
-            color: var(--green);
-            font-weight: 600;
-        }
-        .progress-bar-bg {
+        .progress-bar {
             width: 100%;
             height: 6px;
             border-radius: 10px;
             background: var(--surface2);
             overflow: hidden;
-            margin-top: 2px;
         }
-        .progress-bar-fill {
+        .progress-fill {
             height: 100%;
             border-radius: 10px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 0.7s;
         }
-        .progress-bar-fill.green {
+        .progress-fill.green {
             background: var(--green);
         }
-        .progress-bar-fill.blue {
+        .progress-fill.blue {
             background: var(--blue);
         }
-        .progress-bar-fill.teal {
+        .progress-fill.teal {
             background: var(--teal);
         }
-        .progress-bar-fill.purple {
+        .progress-fill.purple {
             background: var(--purple);
         }
-        .progress-bar-fill.orange {
-            background: var(--orange);
+        .chart-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: clamp(14px, 2vw, 20px);
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
         }
-
-        /* ===== CIRCLE CARD ===== */
-        .card-circle-card {
+        .chart-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .chart-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .chart-tab.active {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #fff;
+        }
+        .smart-goal-btn {
+            position: fixed;
+            bottom: 120px;
+            right: clamp(16px, 3vw, 28px);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-header);
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 80;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .smart-goal-btn:hover {
+            transform: scale(1.1);
+        }
+        .smart-goal-btn:active {
+            transform: scale(0.9);
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 0 16px;
+            z-index: 90;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 20px 20px 0 0;
+        }
+        .bottom-nav button {
+            background: none;
+            border: none;
+            color: var(--text3);
+            cursor: pointer;
+            font-size: 0.7rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
-            gap: 6px;
+            gap: 4px;
+            transition: var(--transition);
+            padding: 8px 14px;
+            border-radius: 14px;
+            font-family: var(--font);
         }
-        .circle-wrap {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            margin: 0 auto;
+        .bottom-nav button.active {
+            color: var(--blue);
+            background: var(--surface2);
         }
-        .circle-wrap svg {
+        .bottom-nav button .nav-icon {
+            font-size: 1.4rem;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            transform: rotate(-90deg);
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(6px);
+            animation: fadeIn 0.25s;
         }
-        .circle-wrap .bg-circle {
-            fill: none;
-            stroke: var(--surface3);
-            stroke-width: 10;
+        .modal-overlay.hidden {
+            display: none;
         }
-        .circle-wrap .fg-circle {
-            fill: none;
-            stroke-width: 10;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
-        .circle-wrap .fg-circle.green {
-            stroke: var(--green);
+        .modal {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: clamp(20px, 3vw, 28px);
+            width: 100%;
+            max-width: 440px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+            animation: modalSlide 0.3s ease;
+            position: relative;
+            border: 1px solid var(--border);
         }
-        .circle-wrap .fg-circle.blue {
-            stroke: var(--blue);
+        @keyframes modalSlide {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-        .circle-center-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            pointer-events: none;
-        }
-        .circle-center-text .big {
-            font-size: 1.8rem;
+        .modal h3 {
+            font-size: 1.25rem;
             font-weight: 700;
-            letter-spacing: -0.5px;
-            line-height: 1;
+            margin-bottom: 16px;
         }
-        .circle-center-text .big.green {
-            color: var(--green);
+        .modal .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: var(--surface2);
+            border: none;
+            color: var(--text);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .circle-center-text .big.blue {
-            color: var(--blue);
+        .modal input[type="number"] {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            font-size: 1rem;
+            font-family: var(--font);
+            outline: none;
+            margin: 8px 0;
         }
-        .circle-center-text .unit {
-            font-size: 0.7rem;
-            color: var(--text3);
-            font-weight: 500;
-            margin-top: 2px;
+        .modal input[type="number"]:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.2);
         }
-        .card-circle-card .card-label-bottom {
-            font-size: 0.85rem;
-            color: var(--text2);
-            font-weight: 500;
-            margin-top: 2px;
+        .quick-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 10px 0;
         }
-
-        /* ===== IMC CARD ===== */
+        .quick-btn {
+            padding: 8px 14px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-family: var(--font);
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font);
+            font-size: 0.95rem;
+            margin-top: 10px;
+            transition: var(--transition);
+        }
+        .btn-primary.green-btn {
+            background: var(--green);
+            color: #000;
+        }
+        .btn-primary.blue-btn {
+            background: var(--blue);
+            color: #fff;
+        }
         .imc-classification {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
-            letter-spacing: 0.2px;
-        }
-        .imc-classification.underweight {
-            background: var(--blue-bg);
-            color: var(--blue);
         }
         .imc-classification.normal {
-            background: var(--green-bg);
+            background: rgba(14, 234, 142, 0.15);
             color: var(--green);
         }
         .imc-classification.overweight {
-            background: var(--orange-bg);
+            background: rgba(255, 169, 77, 0.15);
             color: var(--orange);
         }
         .imc-classification.obese {
-            background: var(--red-bg);
+            background: rgba(255, 94, 94, 0.15);
             color: var(--red);
         }
-
-        /* ===== TOAST ===== */
+        .imc-classification.underweight {
+            background: rgba(59, 158, 255, 0.15);
+            color: var(--blue);
+        }
         .toast-container {
             position: fixed;
-            bottom: 30px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
-            pointer-events: none;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            pointer-events: none;
         }
         .toast {
             background: var(--surface3);
             color: var(--text);
-            padding: 12px 22px;
+            padding: 10px 22px;
             border-radius: 30px;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 500;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-            animation: toastIn 0.4s ease, toastOut 0.4s ease 1.6s forwards;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            animation: toastIn 0.4s, toastOut 0.4s 1.8s forwards;
             pointer-events: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         @keyframes toastIn {
             from {
@@ -461,1161 +670,890 @@
                 transform: translateY(-20px);
             }
         }
-
-        /* ===== MODAL OVERLAY ===== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.25s ease;
-            padding: 20px;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-        }
-        .modal-overlay.hidden {
-            display: none;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        .modal {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 24px 20px 20px;
-            width: 100%;
-            max-width: 420px;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-            animation: modalSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        @keyframes modalSlide {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        .modal h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: -0.3px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .modal .close-btn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
+        .privacy-notice {
             background: var(--surface2);
-            border: none;
-            color: var(--text);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: var(--transition);
+            border-radius: var(--radius-xs);
+            padding: 12px 16px;
+            margin-top: 20px;
+            font-size: 0.78rem;
+            color: var(--text2);
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-start;
+            gap: 10px;
+            border: 1px solid var(--border);
         }
-        .modal .close-btn:hover {
-            background: var(--surface3);
+        .config-input-wrapper {
+            position: relative;
+            margin: 12px 0;
         }
-        .modal input[type="number"] {
+        .config-input-wrapper label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text2);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .config-input-wrapper input[type="number"] {
             width: 100%;
             padding: 14px 16px;
-            border-radius: var(--radius-xs);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            background: var(--surface2);
+            border-radius: 14px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
             color: var(--text);
-            font-size: 1.1rem;
-            font-weight: 500;
-            font-family: var(--font);
-            transition: var(--transition);
-            outline: none;
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-        .modal input[type="number"]::-webkit-outer-spin-button,
-        .modal input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .modal input[type="number"]:focus {
-            border-color: var(--blue);
-            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.15);
-        }
-        .modal .quick-btns {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        .modal .quick-btn {
-            padding: 10px 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: var(--surface2);
-            color: var(--text);
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: var(--transition);
-            font-family: var(--font);
-            white-space: nowrap;
-        }
-        .modal .quick-btn:hover {
-            background: var(--surface3);
-            border-color: rgba(255, 255, 255, 0.25);
-        }
-        .modal .quick-btn:active {
-            transform: scale(0.94);
-            opacity: 0.8;
-        }
-        .modal .btn-primary {
-            width: 100%;
-            padding: 14px;
-            border-radius: 30px;
-            border: none;
             font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
             font-family: var(--font);
-            letter-spacing: 0.1px;
-            margin-top: 12px;
+            outline: none;
+            transition: var(--transition);
         }
-        .modal .btn-primary.green-btn {
-            background: var(--green);
-            color: #000;
+        .config-input-wrapper input[type="number"]:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.15);
         }
-        .modal .btn-primary.blue-btn {
-            background: var(--blue);
-            color: #fff;
-        }
-        .modal .btn-primary:hover {
-            opacity: 0.85;
-            transform: translateY(-1px);
-        }
-        .modal .btn-primary:active {
-            transform: scale(0.96);
-        }
-        .modal .entry-list {
-            list-style: none;
-            margin-top: 10px;
-            max-height: 150px;
-            overflow-y: auto;
+        .config-checkbox-wrapper {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .modal .entry-list li {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+            padding: 12px 16px;
             background: var(--surface2);
-            padding: 10px 14px;
             border-radius: var(--radius-xs);
+            border: 1px solid var(--border);
+        }
+        .config-checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--blue);
+            cursor: pointer;
+        }
+        .config-checkbox-wrapper label {
             font-size: 0.85rem;
-        }
-        .modal .entry-list li .remove-entry {
-            background: none;
-            border: none;
-            color: var(--red);
+            color: var(--text);
             cursor: pointer;
-            font-size: 1.1rem;
-            padding: 2px 6px;
-            border-radius: 50%;
-            transition: var(--transition);
+            user-select: none;
         }
-        .modal .entry-list li .remove-entry:hover {
-            background: var(--red-bg);
-        }
-        .modal .water-cups-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            margin: 10px 0;
-        }
-        .modal .water-cup {
-            width: 44px;
-            height: 52px;
-            border-radius: 10px 10px 14px 14px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            background: transparent;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text3);
-            position: relative;
-            overflow: hidden;
-        }
-        .modal .water-cup.filled {
-            border-color: var(--blue);
-            background: rgba(10, 132, 255, 0.25);
-            color: var(--blue);
-        }
-        .modal .water-cup:hover {
-            border-color: var(--blue);
-            transform: translateY(-3px);
-        }
-        .modal .water-cup::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10, 132, 255, 0.3);
-            transition: height 0.3s;
-            border-radius: 0 0 10px 10px;
-        }
-        .modal .water-cup.filled::after {
-            height: 100%;
-        }
-        .modal .imc-result {
-            text-align: center;
-            padding: 14px;
-            background: var(--surface2);
-            border-radius: var(--radius-sm);
-            margin: 10px 0;
-        }
-        .modal .imc-result .imc-number {
-            font-size: 2.5rem;
+        .section-title {
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
             font-weight: 700;
-            letter-spacing: -1px;
+            margin-bottom: 16px;
         }
-        .modal .imc-result .imc-label {
-            font-size: 0.85rem;
+        .achievement-card {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: var(--transition);
+        }
+        .achievement-card.unlocked {
+            border-color: var(--gold);
+            background: rgba(255, 212, 59, 0.08);
+        }
+        .achievement-card.locked {
+            opacity: 0.7;
+        }
+        .achievement-icon {
+            font-size: 2rem;
+            width: 50px;
+            text-align: center;
+        }
+        .achievement-info {
+            flex: 1;
+        }
+        .achievement-info .name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .achievement-info .desc {
+            font-size: 0.78rem;
             color: var(--text2);
             margin-top: 2px;
         }
-
-        /* ===== SETTINGS GEAR ===== */
-        .settings-gear {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--surface);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text);
-            cursor: pointer;
-            font-size: 1.4rem;
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-        .settings-gear:hover {
-            background: var(--surface2);
-            transform: rotate(30deg);
-        }
-        .settings-gear:active {
-            transform: scale(0.9) rotate(60deg);
-        }
-
-        /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--surface3);
+        .achievement-progress {
+            width: 100%;
+            height: 6px;
             border-radius: 10px;
+            background: var(--surface2);
+            overflow: hidden;
+            margin-top: 8px;
         }
-
-        /* ===== RESPONSIVE FINE-TUNING ===== */
-        @media (max-width: 400px) {
-            .circle-wrap {
-                width: 110px;
-                height: 110px;
+        .achievement-progress-fill {
+            height: 100%;
+            background: var(--blue);
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        .achievement-check {
+            font-size: 1.5rem;
+            color: var(--gold);
+        }
+        .text-sm {
+            font-size: 0.8rem;
+            color: var(--text2);
+        }
+        .mt-2 {
+            margin-top: 8px;
+        }
+        @media(min-width: 2000px) {
+            .main-container {
+                max-width: 1800px;
             }
-            .circle-center-text .big {
-                font-size: 1.4rem;
+            .header-inner {
+                max-width: 1800px;
             }
-            .card-value {
-                font-size: 1.5rem;
-            }
-            .header-title {
-                font-size: 1.1rem;
-            }
-            .date-nav span {
-                font-size: 0.78rem;
-                min-width: 90px;
-            }
-            .modal {
-                padding: 18px 14px 16px;
-                border-radius: var(--radius-sm);
+            .cards-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 20px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- ==================== HEADER ==================== -->
     <header class="header">
         <div class="header-inner">
             <div class="header-brand">
                 <div class="header-logo">H</div>
-                <span class="header-title">Health Dashboard</span>
+                <span class="header-title">Health</span>
             </div>
-            <div class="date-nav">
-                <button class="btn-icon" id="btnPrevDay" title="Dia anterior" aria-label="Dia anterior">◂</button>
-                <span id="dateDisplay">Hoje</span>
-                <span class="today-badge" id="todayBadge" style="display:none;">Hoje</span>
-                <button class="btn-icon" id="btnNextDay" title="Próximo dia" aria-label="Próximo dia">▸</button>
-                <button class="btn-today" id="btnGoToday" style="display:none;" title="Voltar para hoje">📅 Hoje</button>
+            <div class="header-actions">
+                <div class="date-nav">
+                    <button class="btn-icon" id="btnPrevDay" title="Dia anterior">◂</button>
+                    <span id="dateDisplay">Hoje</span>
+                    <span class="today-badge" id="todayBadge" style="display:none;">Hoje</span>
+                    <button class="btn-icon" id="btnNextDay" title="Próximo dia">▸</button>
+                    <button class="btn-today" id="btnGoToday" style="display:none;">📅 Hoje</button>
+                </div>
+                <div class="theme-toggle" id="themeToggle" title="Alternar tema">
+                    <span data-theme="dark">🌙</span>
+                    <span data-theme="light">☀️</span>
+                    <span data-theme="amoled" id="amoledThemeOption" style="display:none;">⚫</span>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- ==================== MAIN DASHBOARD ==================== -->
-    <main class="main-container">
+    <main class="main-container section-page active" id="pageDashboard">
+        <div class="gamification-row">
+            <div class="gamification-card">
+                <div class="text-sm">🔥 Sequência</div>
+                <div style="font-size:clamp(1.6rem, 2.5vw, 2.2rem);font-weight:800;" id="streakCount">0</div>
+                <div class="text-sm">dias consecutivos</div>
+            </div>
+            <div class="gamification-card">
+                <div class="text-sm">⭐ Nível</div>
+                <span class="level-badge" id="levelDisplay">Nível 1</span>
+                <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%;"></div></div>
+                <div class="text-sm" id="xpText">0/100 XP</div>
+            </div>
+            <div class="gamification-card">
+                <div class="text-sm">🏆 Conquistas</div>
+                <div style="font-size:clamp(1.6rem, 2.5vw, 2.2rem);font-weight:800;" id="achievementCount">0</div>
+                <div class="text-sm">desbloqueadas</div>
+            </div>
+        </div>
+
         <div class="cards-grid" id="cardsGrid">
-            <!-- Card Calorias (círculo) -->
-            <div class="card card-circle-card" id="cardCalorias" data-modal="modalCalorias">
-                <div class="card-header-row">
-                    <div class="card-icon green">🔥</div>
-                    <span class="card-label">Calorias Ingeridas</span>
-                </div>
-                <div class="circle-wrap">
-                    <svg viewBox="0 0 200 200">
-                        <circle class="bg-circle" cx="100" cy="100" r="85"/>
-                        <circle class="fg-circle green" id="circleCalorias" cx="100" cy="100" r="85"
-                        stroke-dasharray="534.07" stroke-dashoffset="534.07"/>
-                    </svg>
-                    <div class="circle-center-text">
-                        <span class="big green" id="calValue">0</span>
-                        <div class="unit">kcal</div>
-                    </div>
-                </div>
-                <span class="card-label-bottom">Meta: <strong id="calMetaDisplay">2000</strong> kcal</span>
+            <div class="card" data-modal="modalCalorias">
+                <div class="card-icon-row"><div class="card-icon-sm">🔥</div><span class="card-label">Calorias</span></div>
+                <span class="card-value" style="color:var(--green);" id="calValue">0</span>
+                <div class="progress-bar"><div class="progress-fill green" id="calProgress" style="width:0%;"></div></div>
+                <span class="card-sub">Meta: <strong id="calMetaDisplay">2000</strong> kcal</span>
             </div>
-
-            <!-- Card Água (círculo) -->
-            <div class="card card-circle-card" id="cardAgua" data-modal="modalAgua">
-                <div class="card-header-row">
-                    <div class="card-icon blue">💧</div>
-                    <span class="card-label">Água Ingerida</span>
-                </div>
-                <div class="circle-wrap">
-                    <svg viewBox="0 0 200 200">
-                        <circle class="bg-circle" cx="100" cy="100" r="85"/>
-                        <circle class="fg-circle blue" id="circleAgua" cx="100" cy="100" r="85"
-                        stroke-dasharray="534.07" stroke-dashoffset="534.07"/>
-                    </svg>
-                    <div class="circle-center-text">
-                        <span class="big blue" id="aguaValue">0</span>
-                        <div class="unit">ml</div>
-                    </div>
-                </div>
-                <span class="card-label-bottom">Meta: <strong id="aguaMetaDisplay">2000</strong> ml</span>
+            <div class="card" data-modal="modalAgua">
+                <div class="card-icon-row"><div class="card-icon-sm">💧</div><span class="card-label">Água</span></div>
+                <span class="card-value" style="color:var(--blue);" id="aguaValue">0</span>
+                <div class="progress-bar"><div class="progress-fill blue" id="aguaProgress" style="width:0%;"></div></div>
+                <span class="card-sub">Meta: <strong id="aguaMetaDisplay">2000</strong> ml</span>
             </div>
-
-            <!-- Card IMC -->
-            <div class="card" id="cardIMC" data-modal="modalIMC">
-                <div class="card-header-row">
-                    <div class="card-icon orange">⚖️</div>
-                    <span class="card-label">IMC</span>
-                </div>
-                <span class="card-value orange" id="imcValue">--</span>
+            <div class="card" data-modal="modalIMC">
+                <div class="card-icon-row"><div class="card-icon-sm">⚖️</div><span class="card-label">IMC</span></div>
+                <span class="card-value" style="color:var(--orange);" id="imcValue">--</span>
                 <span class="imc-classification" id="imcClass" style="display:none;"></span>
-                <span class="card-sub" id="imcSub">Toque para calcular</span>
             </div>
-
-            <!-- Card Caminhada -->
-            <div class="card" id="cardCaminhada" data-modal="modalCaminhada">
-                <div class="card-header-row">
-                    <div class="card-icon teal">🚶</div>
-                    <span class="card-label">Caminhada Hoje</span>
-                </div>
-                <span class="card-value teal" id="walkValue">0</span>
-                <span class="card-sub">metros</span>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill teal" id="walkProgressBar" style="width: 0%;"></div>
-                </div>
+            <div class="card" data-modal="modalCaminhada">
+                <div class="card-icon-row"><div class="card-icon-sm">🚶</div><span class="card-label">Caminhada</span></div>
+                <span class="card-value" style="color:var(--teal);" id="walkValue">0</span>
+                <div class="progress-bar"><div class="progress-fill teal" id="walkProgress" style="width:0%;"></div></div>
                 <span class="card-sub">Meta: <strong id="walkMetaDisplay">5000</strong> m</span>
             </div>
-
-            <!-- Card Sono -->
-            <div class="card card-sono" id="cardSono" data-modal="modalSono">
-                <div class="card-header-row">
-                    <div class="card-icon purple">😴</div>
-                    <span class="card-label">Horas de Sono</span>
-                </div>
-                <span class="card-value purple" id="sleepValue">0</span>
-                <span class="card-sub">horas</span>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill purple" id="sleepProgressBar" style="width: 0%;"></div>
-                </div>
+            <div class="card" data-modal="modalSono">
+                <div class="card-icon-row"><div class="card-icon-sm">😴</div><span class="card-label">Sono</span></div>
+                <span class="card-value" style="color:var(--purple);" id="sleepValue">0</span>
+                <div class="progress-bar"><div class="progress-fill purple" id="sleepProgress" style="width:0%;"></div></div>
                 <span class="card-sub">Meta: <strong id="sleepMetaDisplay">8</strong> h</span>
             </div>
         </div>
+
+        <div class="chart-card">
+            <div class="chart-tabs" id="chartTabs">
+                <button class="chart-tab active" data-metric="calories">🔥 Calorias</button>
+                <button class="chart-tab" data-metric="water">💧 Água</button>
+                <button class="chart-tab" data-metric="walked">🚶 Caminhada</button>
+                <button class="chart-tab" data-metric="sleep">😴 Sono</button>
+            </div>
+            <canvas id="historyChart" height="200"></canvas>
+        </div>
+
+        <button class="smart-goal-btn" id="btnOpenSmartGoals" title="Metas Inteligentes">🧠</button>
     </main>
 
-    <!-- ==================== MODAIS ==================== -->
-    <!-- Modal Calorias -->
-    <div class="modal-overlay hidden" id="modalCalorias">
-        <div class="modal" style="position:relative;">
+    <div class="main-container section-page" id="pageAchievements">
+        <div class="section-title">🏆 Conquistas</div>
+        <div id="achievementsList"></div>
+    </div>
+
+    <div class="main-container section-page" id="pageConfig">
+        <div class="section-title">⚙️ Configurações</div>
+        <div class="chart-card">
+            <div class="config-input-wrapper">
+                <label>🔥 Meta de Calorias (kcal)</label>
+                <input type="number" id="inputMetaCalorias" value="2000" min="500" max="10000" step="100" placeholder="Ex: 2000">
+            </div>
+            <div class="config-input-wrapper">
+                <label>💧 Meta de Água (ml)</label>
+                <input type="number" id="inputMetaAgua" value="2000" min="500" max="10000" step="250" placeholder="Ex: 2000">
+            </div>
+            <div class="config-input-wrapper">
+                <label>🚶 Meta de Caminhada (metros)</label>
+                <input type="number" id="inputMetaCaminhada" value="5000" min="500" max="50000" step="500" placeholder="Ex: 5000">
+            </div>
+            <div class="config-input-wrapper">
+                <label>😴 Meta de Sono (horas)</label>
+                <input type="number" id="inputMetaSono" value="8" min="2" max="16" step="0.5" placeholder="Ex: 8">
+            </div>
+            <button class="btn-primary" style="background:var(--blue);color:#fff;" id="btnSaveMetas">💾 Salvar Metas</button>
+            <button class="btn-primary" style="background:var(--red);color:#fff;margin-top:8px;" id="btnResetAll">⚠️ Resetar Todos os Dados</button>
+            <button class="btn-primary" style="background:var(--surface3);color:var(--text);margin-top:8px;" id="btnRequestNotification">🔔 Ativar Lembretes</button>
+
+            <div class="config-checkbox-wrapper">
+                <input type="checkbox" id="amoledCheckbox">
+                <label for="amoledCheckbox">Ativar tema AMOLED (preto puro) nas opções de tema</label>
+            </div>
+        </div>
+        <div class="privacy-notice">
+            <span class="icon">🔒</span>
+            <span>Seus dados são armazenados apenas neste dispositivo. Nenhuma informação é enviada para servidores externos ou compartilhada. Você tem controle total sobre suas informações.</span>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="active" data-page="pageDashboard"><span class="nav-icon">📊</span>Painel</button>
+        <button data-page="pageAchievements"><span class="nav-icon">🏆</span>Conquistas</button>
+        <button data-page="pageConfig"><span class="nav-icon">⚙️</span>Ajustes</button>
+    </nav>
+
+    <div class="modal-overlay hidden" id="modalCalorias"><div class="modal">
             <button class="close-btn" data-close="modalCalorias">✕</button>
             <h3>🔥 Adicionar Calorias</h3>
             <input type="number" id="inputCalorias" placeholder="Quantidade em kcal" min="1" step="1" inputmode="numeric">
-            <div class="quick-btns">
-                <button class="quick-btn" data-add="50">50 kcal</button>
-                <button class="quick-btn" data-add="100">100 kcal</button>
-                <button class="quick-btn" data-add="200">200 kcal</button>
-                <button class="quick-btn" data-add="350">350 kcal</button>
-                <button class="quick-btn" data-add="500">500 kcal</button>
-                <button class="quick-btn" data-add="800">800 kcal</button>
-            </div>
+            <div class="quick-btns"><button class="quick-btn" data-add="100">100</button><button class="quick-btn" data-add="200">200</button><button class="quick-btn" data-add="350">350</button><button class="quick-btn" data-add="500">500</button><button class="quick-btn" data-add="800">800</button></div>
             <button class="btn-primary green-btn" id="btnAddCalorias">Adicionar</button>
-            <ul class="entry-list" id="calEntriesList"></ul>
-            <button class="btn-primary" style="background:var(--surface3);color:var(--text);margin-top:6px;" id="btnClearCalorias">🗑 Limpar registros do dia</button>
-        </div>
-    </div>
-
-    <!-- Modal Água -->
-    <div class="modal-overlay hidden" id="modalAgua">
-        <div class="modal" style="position:relative;">
+            <button class="btn-primary" style="background:var(--surface3);color:var(--text);" id="btnClearCalorias">🗑 Limpar dia</button>
+    </div></div>
+    <div class="modal-overlay hidden" id="modalAgua"><div class="modal">
             <button class="close-btn" data-close="modalAgua">✕</button>
             <h3>💧 Adicionar Água</h3>
-            <p style="color:var(--text2);font-size:0.85rem;text-align:center;">Cada copo = 250 ml • Toque nos copos</p>
-            <div class="water-cups-row" id="waterCupsRow"></div>
-            <input type="number" id="inputAgua" placeholder="Ou digite a quantidade (ml)" min="50" step="50" inputmode="numeric" style="margin-top:8px;">
-            <button class="btn-primary blue-btn" id="btnAddAgua">Adicionar quantidade</button>
-            <button class="btn-primary" style="background:var(--surface3);color:var(--text);margin-top:6px;" id="btnClearAgua">🗑 Limpar registros do dia</button>
-        </div>
-    </div>
-
-    <!-- Modal IMC -->
-    <div class="modal-overlay hidden" id="modalIMC">
-        <div class="modal" style="position:relative;">
+            <input type="number" id="inputAgua" placeholder="Quantidade em ml" min="50" step="50" inputmode="numeric">
+            <div class="quick-btns"><button class="quick-btn" data-add="250">250ml</button><button class="quick-btn" data-add="500">500ml</button><button class="quick-btn" data-add="750">750ml</button><button class="quick-btn" data-add="1000">1L</button></div>
+            <button class="btn-primary blue-btn" id="btnAddAgua">Adicionar</button>
+            <button class="btn-primary" style="background:var(--surface3);color:var(--text);" id="btnClearAgua">🗑 Limpar dia</button>
+    </div></div>
+    <div class="modal-overlay hidden" id="modalIMC"><div class="modal">
             <button class="close-btn" data-close="modalIMC">✕</button>
             <h3>⚖️ Calcular IMC</h3>
-            <label style="color:var(--text2);font-size:0.8rem;font-weight:500;">Peso (kg)</label>
-            <input type="number" id="inputPeso" placeholder="Ex: 70" min="20" max="300" step="0.1" inputmode="decimal" style="margin-bottom:10px;">
-            <label style="color:var(--text2);font-size:0.8rem;font-weight:500;">Altura (cm)</label>
+            <label class="text-sm">Peso (kg)</label>
+            <input type="number" id="inputPeso" placeholder="Ex: 70" min="20" max="300" step="0.1" inputmode="decimal">
+            <label class="text-sm">Altura (cm)</label>
             <input type="number" id="inputAltura" placeholder="Ex: 170" min="50" max="250" step="0.5" inputmode="decimal">
-            <div class="imc-result hidden" id="imcResultBox">
-                <span class="imc-number" id="imcResultNumber"></span>
-                <span class="imc-label" id="imcResultLabel"></span>
+            <div id="imcResultBox" style="text-align:center;padding:14px;margin:10px 0;background:var(--surface2);border-radius:16px;display:none;">
+                <span style="font-size:2.2rem;font-weight:800;" id="imcResultNumber"></span>
+                <span style="display:block;font-size:0.85rem;color:var(--text2);" id="imcResultLabel"></span>
             </div>
             <button class="btn-primary" style="background:var(--orange);color:#000;" id="btnCalcIMC">Calcular e Salvar</button>
-        </div>
-    </div>
-
-    <!-- Modal Caminhada -->
-    <div class="modal-overlay hidden" id="modalCaminhada">
-        <div class="modal" style="position:relative;">
+    </div></div>
+    <div class="modal-overlay hidden" id="modalCaminhada"><div class="modal">
             <button class="close-btn" data-close="modalCaminhada">✕</button>
             <h3>🚶 Registrar Caminhada</h3>
             <input type="number" id="inputCaminhada" placeholder="Metros percorridos" min="1" step="1" inputmode="numeric">
-            <div class="quick-btns">
-                <button class="quick-btn" data-add="500">500 m</button>
-                <button class="quick-btn" data-add="1000">1 km</button>
-                <button class="quick-btn" data-add="2000">2 km</button>
-                <button class="quick-btn" data-add="5000">5 km</button>
-                <button class="quick-btn" data-add="10000">10 km</button>
-            </div>
+            <div class="quick-btns"><button class="quick-btn" data-add="500">500m</button><button class="quick-btn" data-add="1000">1km</button><button class="quick-btn" data-add="2000">2km</button><button class="quick-btn" data-add="5000">5km</button></div>
             <button class="btn-primary" style="background:var(--teal);color:#000;" id="btnAddCaminhada">Adicionar</button>
-            <button class="btn-primary" style="background:var(--surface3);color:var(--text);margin-top:6px;" id="btnClearCaminhada">🗑 Zerar caminhada do dia</button>
-        </div>
-    </div>
-
-    <!-- Modal Sono -->
-    <div class="modal-overlay hidden" id="modalSono">
-        <div class="modal" style="position:relative;">
+            <button class="btn-primary" style="background:var(--surface3);color:var(--text);" id="btnClearCaminhada">🗑 Zerar dia</button>
+    </div></div>
+    <div class="modal-overlay hidden" id="modalSono"><div class="modal">
             <button class="close-btn" data-close="modalSono">✕</button>
             <h3>😴 Registrar Sono</h3>
             <input type="number" id="inputSono" placeholder="Horas dormidas (ex: 7.5)" min="0" max="24" step="0.5" inputmode="decimal">
-            <div class="quick-btns">
-                <button class="quick-btn" data-add="4">4 h</button>
-                <button class="quick-btn" data-add="5">5 h</button>
-                <button class="quick-btn" data-add="6">6 h</button>
-                <button class="quick-btn" data-add="7">7 h</button>
-                <button class="quick-btn" data-add="8">8 h</button>
-                <button class="quick-btn" data-add="9">9 h</button>
-                <button class="quick-btn" data-add="10">10 h</button>
-            </div>
-            <button class="btn-primary" style="background:var(--purple);color:#fff;" id="btnSetSono">Definir horas de sono</button>
-        </div>
-    </div>
+            <div class="quick-btns"><button class="quick-btn" data-add="5">5h</button><button class="quick-btn" data-add="6">6h</button><button class="quick-btn" data-add="7">7h</button><button class="quick-btn" data-add="8">8h</button><button class="quick-btn" data-add="9">9h</button></div>
+            <button class="btn-primary" style="background:var(--purple);color:#fff;" id="btnSetSono">Definir</button>
+    </div></div>
+    <div class="modal-overlay hidden" id="modalSmartGoals"><div class="modal">
+            <button class="close-btn" data-close="modalSmartGoals">✕</button>
+            <h3>🧠 Metas Inteligentes</h3>
+            <p style="font-size:0.85rem;color:var(--text2);margin-bottom:12px;" id="smartGoalText">
+                Registre pelo menos 7 dias para receber sugestões personalizadas.
+            </p>
+            <button class="quick-btn" id="btnApplySmartGoals" style="display:none;">✨ Aplicar metas sugeridas</button>
+    </div></div>
 
-    <!-- Modal Configurações (Metas) -->
-    <div class="modal-overlay hidden" id="modalConfig">
-        <div class="modal" style="position:relative;">
-            <button class="close-btn" data-close="modalConfig">✕</button>
-            <h3>⚙️ Configurar Metas Diárias</h3>
-            <label style="color:var(--text2);font-size:0.8rem;font-weight:500;">Meta de Calorias (kcal)</label>
-            <input type="number" id="inputMetaCalorias" placeholder="2000" min="500" max="10000" step="100" inputmode="numeric" style="margin-bottom:10px;">
-            <label style="color:var(--text2);font-size:0.8rem;font-weight:500;">Meta de Água (ml)</label>
-            <input type="number" id="inputMetaAgua" placeholder="2000" min="500" max="10000" step="250" inputmode="numeric" style="margin-bottom:10px;">
-            <label style="color:var(--text2);font-size:0.8rem;font-weight:500;">Meta de Caminhada (metros)</label>
-            <input type="number" id="inputMetaCaminhada" placeholder="5000" min="500" max="50000" step="500" inputmode="numeric" style="margin-bottom:10px;">
-            <label style="color:var(--text2);font-size:0.8rem;font-weight:500;">Meta de Sono (horas)</label>
-            <input type="number" id="inputMetaSono" placeholder="8" min="2" max="16" step="0.5" inputmode="decimal">
-            <button class="btn-primary" style="background:#fff;color:#000;" id="btnSaveMetas">💾 Salvar Metas</button>
-            <button class="btn-primary" style="background:var(--red-bg);color:var(--red);margin-top:6px;" id="btnResetAll">⚠️ Resetar Todos os Dados</button>
-        </div>
-    </div>
-
-    <!-- ==================== TOAST CONTAINER ==================== -->
     <div class="toast-container" id="toastContainer"></div>
-
-    <!-- ==================== SETTINGS BUTTON ==================== -->
-    <button class="settings-gear" id="btnConfig" title="Configurações">⚙️</button>
 
     <script>
         (function() {
-            // ============ CONSTANTES ============
-            const STORAGE_KEY = 'healthDashboardData_v2';
-            const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 85; // ~534.07
+            const db = new Dexie('HealthDashboardDB');
+            db.version(1).stores({
+                dailyData: 'date',
+                userProfile: 'id',
+            });
 
-            // ============ ESTADO ============
-            let currentDate = getTodayStr();
-            let userProfile = {
+            const defaultProfile = {
+                id: 'main',
                 weight: null,
                 height: null,
                 calorieGoal: 2000,
                 waterGoal: 2000,
                 walkGoal: 5000,
                 sleepGoal: 8,
+                xp: 0,
+                level: 1,
+                streak: 0,
+                lastActiveDate: null,
+                achievementsUnlocked: [],
             };
-            // dailyData: { "YYYY-MM-DD": { calories: number, water: number, walked: number, sleep: number, calEntries: [], waterEntries: [] } }
-            let dailyData = {};
 
-            // ============ UTILITÁRIOS ============
+            let userProfile = { ...defaultProfile };
+            let currentDate = getTodayStr();
+            let currentMetric = 'calories';
+            let chartInstance = null;
+            let amoledEnabled = localStorage.getItem('amoledEnabled') === 'true';
+
             function getTodayStr() {
                 const d = new Date();
-                return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate())
-                    .padStart(2, '0');
+                return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
             }
-
             function formatDate(dateStr) {
                 const parts = dateStr.split('-');
                 const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro',
-                    'Outubro', 'Novembro', 'Dezembro'
-                ];
-                return d.getDate() + ' de ' + meses[d.getMonth()] + ' de ' + d.getFullYear();
+                const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                return d.getDate() + ' ' + meses[d.getMonth()] + ' ' + d.getFullYear();
             }
-
-            function isToday(dateStr) {
-                return dateStr === getTodayStr();
-            }
-
-            function getDailyData(dateStr) {
-                if (!dailyData[dateStr]) {
-                    dailyData[dateStr] = {
-                        calories: 0,
-                        water: 0,
-                        walked: 0,
-                        sleep: 0,
-                        calEntries: [],
-                        waterEntries: [],
-                    };
-                }
-                return dailyData[dateStr];
-            }
-
-            function clamp(val, min, max) {
-                return Math.max(min, Math.min(max, val));
-            }
-
-            // ============ LOCAL STORAGE ============
-            function saveAllData() {
-                const payload = {
-                    userProfile: userProfile,
-                    dailyData: dailyData,
-                };
-                try {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-                } catch (e) {
-                    showToast('⚠️ Erro ao salvar dados localmente.');
-                }
-            }
-
-            function loadAllData() {
-                try {
-                    const raw = localStorage.getItem(STORAGE_KEY);
-                    if (raw) {
-                        const parsed = JSON.parse(raw);
-                        if (parsed.userProfile) {
-                            userProfile = { ...userProfile, ...parsed.userProfile };
-                        }
-                        if (parsed.dailyData) {
-                            dailyData = parsed.dailyData;
-                        }
-                    }
-                } catch (e) {
-                    showToast('⚠️ Erro ao carregar dados. Iniciando com valores padrão.');
-                }
-                // Garantir dados do dia atual
-                getDailyData(currentDate);
-            }
-
-            // ============ TOAST ============
+            function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
             function showToast(msg) {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
                 toast.className = 'toast';
                 toast.textContent = msg;
                 container.appendChild(toast);
-                setTimeout(() => {
-                    if (toast.parentNode) toast.parentNode.removeChild(toast);
-                }, 2100);
+                setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2200);
             }
 
-            // ============ RENDER ============
-            function renderAll() {
-                const data = getDailyData(currentDate);
-                const isTodayFlag = isToday(currentDate);
-
-                // Data display
-                document.getElementById('dateDisplay').textContent = formatDate(currentDate);
-                const todayBadge = document.getElementById('todayBadge');
-                const btnGoToday = document.getElementById('btnGoToday');
-                if (isTodayFlag) {
-                    todayBadge.style.display = 'inline';
-                    btnGoToday.style.display = 'none';
-                } else {
-                    todayBadge.style.display = 'none';
-                    btnGoToday.style.display = 'inline';
+            async function loadProfile() {
+                const p = await db.userProfile.get('main');
+                if (p) userProfile = { ...defaultProfile, ...p };
+                else await db.userProfile.put({ ...defaultProfile });
+                if (!userProfile.achievementsUnlocked) userProfile.achievementsUnlocked = [];
+            }
+            async function saveProfile() { await db.userProfile.put(userProfile); }
+            async function getDailyData(dateStr) {
+                let d = await db.dailyData.get(dateStr);
+                if (!d) {
+                    d = { date: dateStr, calories: 0, water: 0, walked: 0, sleep: 0, calEntries: [], waterEntries: [] };
+                    await db.dailyData.put(d);
                 }
+                return d;
+            }
+            async function saveDailyData(data) { await db.dailyData.put(data); }
+            async function getAllDailyData() { return await db.dailyData.toArray(); }
 
-                // Desabilitar próximo dia se for hoje
-                document.getElementById('btnNextDay').disabled = isTodayFlag;
-                document.getElementById('btnNextDay').style.opacity = isTodayFlag ? '0.3' : '1';
+            const workerCode = `
+            self.onmessage = function(e) {
+              const { type, data } = e.data;
+              if (type === 'calculateIMC') {
+                const { weight, heightCm } = data;
+                const heightM = heightCm / 100;
+                const imc = weight / (heightM * heightM);
+                let classification = 'normal';
+                if (imc < 18.5) classification = 'underweight';
+                else if (imc < 25) classification = 'normal';
+                else if (imc < 30) classification = 'overweight';
+                else classification = 'obese';
+                self.postMessage({ type: 'imcResult', imc, classification });
+              }
+              if (type === 'analyzeHistory') {
+                const records = data.filter(r => r.calories > 0 || r.water > 0 || r.walked > 0 || r.sleep > 0);
+                if (records.length < 7) {
+                  self.postMessage({ type: 'smartGoals', goals: null, message: 'Registre pelo menos 7 dias para receber sugestões personalizadas.' });
+                  return;
+                }
+                const avgCal = records.reduce((s,r)=>s+(r.calories||0),0)/records.length;
+                const avgWater = records.reduce((s,r)=>s+(r.water||0),0)/records.length;
+                const avgWalk = records.reduce((s,r)=>s+(r.walked||0),0)/records.length;
+                const avgSleep = records.reduce((s,r)=>s+(r.sleep||0),0)/records.length;
+                const goals = {
+                  calorieGoal: Math.round(avgCal * 1.15 / 100)*100,
+                  waterGoal: Math.round(avgWater * 1.1 / 250)*250,
+                  walkGoal: Math.round(avgWalk * 1.2 / 500)*500,
+                  sleepGoal: Math.round(avgSleep * 10)/10
+                };
+                self.postMessage({ type: 'smartGoals', goals, message: 'Metas sugeridas com base em '+records.length+' dias de histórico.' });
+              }
+            };`;
+            const healthWorker = new Worker(URL.createObjectURL(new Blob([workerCode], { type: 'application/javascript' })));
+            healthWorker.onmessage = function(e) {
+                const { type, imc, classification, goals, message } = e.data;
+                if (type === 'imcResult') {
+                    document.getElementById('imcResultBox').style.display = 'block';
+                    document.getElementById('imcResultNumber').textContent = imc.toFixed(1);
+                    document.getElementById('imcResultLabel').textContent =
+                        classification === 'normal' ? 'Peso normal' : classification === 'underweight' ? 'Abaixo do peso' : classification === 'overweight' ? 'Sobrepeso' : 'Obesidade';
+                    document.getElementById('imcResultNumber').style.color =
+                        classification === 'normal' ? 'var(--green)' : classification === 'underweight' ? 'var(--blue)' : classification === 'overweight' ? 'var(--orange)' : 'var(--red)';
+                }
+                if (type === 'smartGoals') {
+                    document.getElementById('smartGoalText').textContent = message;
+                    if (goals) {
+                        window.suggestedGoals = goals;
+                        document.getElementById('btnApplySmartGoals').style.display = 'inline-block';
+                        document.getElementById('smartGoalText').textContent += ` Sugestão: ${goals.calorieGoal} kcal, ${goals.waterGoal} ml, ${goals.walkGoal} m, ${goals.sleepGoal}h.`;
+                    } else {
+                        window.suggestedGoals = null;
+                        document.getElementById('btnApplySmartGoals').style.display = 'none';
+                    }
+                }
+            };
 
-                // Calorias
+            function addXP(amount) {
+                userProfile.xp = (userProfile.xp || 0) + amount;
+                const xpNeeded = userProfile.level * 100;
+                while (userProfile.xp >= xpNeeded) {
+                    userProfile.xp -= xpNeeded;
+                    userProfile.level = (userProfile.level || 1) + 1;
+                    showToast(`🎉 Nível ${userProfile.level}!`);
+                }
+                saveProfile();
+                renderGamification();
+            }
+            function updateStreak() {
+                const today = getTodayStr();
+                const last = userProfile.lastActiveDate;
+                if (last === today) return;
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.getFullYear() + '-' + String(yesterday.getMonth() + 1).padStart(2, '0') + '-' + String(yesterday.getDate()).padStart(2, '0');
+                if (last === yesterdayStr) userProfile.streak = (userProfile.streak || 0) + 1;
+                else if (last !== today) userProfile.streak = 1;
+                userProfile.lastActiveDate = today;
+                saveProfile();
+                renderGamification();
+                checkAchievements();
+            }
+
+            const achievementDefs = [
+                { id: 'first_log', name: 'Primeiro Registro', desc: 'Registrar qualquer métrica pela primeira vez', icon: '📝', category: 'Geral', progress: () => 1, goal: 1 },
+                { id: 'streak_7', name: '7 Dias Seguidos', desc: 'Manter uma sequência de 7 dias consecutivos de registros', icon: '🔥', category: 'Sequência', progress: () => userProfile.streak, goal: 7 },
+                { id: 'streak_30', name: '30 Dias Seguidos', desc: 'Manter uma sequência de 30 dias consecutivos de registros', icon: '💪', category: 'Sequência', progress: () => userProfile.streak, goal: 30 },
+                { id: 'level_5', name: 'Nível 5', desc: 'Alcançar o nível 5 ganhando XP com seus registros', icon: '⭐', category: 'Nível', progress: () => userProfile.level, goal: 5 },
+                { id: 'level_10', name: 'Nível 10', desc: 'Alcançar o nível 10 e se tornar um mestre da saúde', icon: '🌟', category: 'Nível', progress: () => userProfile.level, goal: 10 },
+                { id: 'water_master', name: 'Hidratado', desc: 'Atingir a meta diária de água por 5 dias', icon: '💧', category: 'Metas', progress: async () => { const all = await getAllDailyData(); return all.filter(d => (d.water || 0) >= userProfile.waterGoal).length; }, goal: 5 },
+                { id: 'walk_marathon', name: 'Maratonista', desc: 'Acumular 42 km (42.000 metros) caminhados no total', icon: '🏃', category: 'Metas', progress: async () => { const all = await getAllDailyData(); return all.reduce((s, d) => s + (d.walked || 0), 0); }, goal: 42000 },
+                { id: 'calorie_count', name: 'Contador de Calorias', desc: 'Registrar calorias em 20 dias diferentes', icon: '🍽', category: 'Metas', progress: async () => { const all = await getAllDailyData(); return all.filter(d => (d.calories || 0) > 0).length; }, goal: 20 },
+            ];
+
+            async function checkAchievements() {
+                let updated = false;
+                for (const ach of achievementDefs) {
+                    if (userProfile.achievementsUnlocked.includes(ach.id)) continue;
+                    const prog = await ach.progress();
+                    if (prog >= ach.goal) {
+                        userProfile.achievementsUnlocked.push(ach.id);
+                        updated = true;
+                        showToast(`🏆 ${ach.name}!`);
+                        addXP(50);
+                    }
+                }
+                if (updated) await saveProfile();
+                renderAchievementsPage();
+                renderGamification();
+            }
+
+            function renderGamification() {
+                document.getElementById('streakCount').textContent = userProfile.streak || 0;
+                document.getElementById('levelDisplay').textContent = 'Nível ' + (userProfile.level || 1);
+                const xpNeeded = (userProfile.level || 1) * 100;
+                const xp = userProfile.xp || 0;
+                document.getElementById('xpFill').style.width = clamp((xp / xpNeeded) * 100, 0, 100) + '%';
+                document.getElementById('xpText').textContent = xp + '/' + xpNeeded + ' XP';
+                document.getElementById('achievementCount').textContent = (userProfile.achievementsUnlocked || []).length;
+            }
+
+            async function renderAchievementsPage() {
+                const container = document.getElementById('achievementsList');
+                let html = '';
+                const categories = ['Geral', 'Sequência', 'Nível', 'Metas'];
+                for (const cat of categories) {
+                    const catAchievements = achievementDefs.filter(a => a.category === cat);
+                    if (catAchievements.length === 0) continue;
+                    html += `<div style="font-weight:600;font-size:0.9rem;color:var(--text2);margin-top:16px;margin-bottom:8px;">${cat}</div>`;
+                    for (const ach of catAchievements) {
+                        const unlocked = (userProfile.achievementsUnlocked || []).includes(ach.id);
+                        const prog = await ach.progress();
+                        const percent = clamp((prog / ach.goal) * 100, 0, 100);
+                        html += `
+                        <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
+                            <div class="achievement-icon">${ach.icon}</div>
+                            <div class="achievement-info">
+                                <div class="name">${ach.name}</div>
+                                <div class="desc">${ach.desc}</div>
+                                <div class="achievement-progress">
+                                    <div class="achievement-progress-fill" style="width:${percent}%;"></div>
+                                </div>
+                                <div class="text-sm" style="margin-top:4px;">${prog} / ${ach.goal}</div>
+                            </div>
+                            ${unlocked ? '<div class="achievement-check">✅</div>' : ''}
+                        </div>`;
+                    }
+                }
+                container.innerHTML = html || '<p style="color:var(--text3);">Nenhuma conquista disponível.</p>';
+                document.getElementById('achievementCount').textContent = (userProfile.achievementsUnlocked || []).length;
+            }
+
+            async function renderAll() {
+                const data = await getDailyData(currentDate);
+                const isToday = currentDate === getTodayStr();
+                document.getElementById('dateDisplay').textContent = formatDate(currentDate);
+                document.getElementById('todayBadge').style.display = isToday ? 'inline' : 'none';
+                document.getElementById('btnGoToday').style.display = isToday ? 'none' : 'inline';
+                document.getElementById('btnNextDay').disabled = isToday;
+                document.getElementById('btnNextDay').style.opacity = isToday ? '0.3' : '1';
+
                 const calGoal = userProfile.calorieGoal;
-                const calConsumed = data.calories || 0;
-                const calProgress = clamp(calConsumed / calGoal, 0, 1);
-                document.getElementById('calValue').textContent = calConsumed;
+                const calVal = data.calories || 0;
+                document.getElementById('calValue').textContent = calVal;
                 document.getElementById('calMetaDisplay').textContent = calGoal;
-                updateCircle('circleCalorias', calProgress);
+                document.getElementById('calProgress').style.width = clamp((calVal / calGoal) * 100, 0, 100) + '%';
 
-                // Água
                 const aguaGoal = userProfile.waterGoal;
-                const aguaConsumed = data.water || 0;
-                const aguaProgress = clamp(aguaConsumed / aguaGoal, 0, 1);
-                document.getElementById('aguaValue').textContent = aguaConsumed;
+                const aguaVal = data.water || 0;
+                document.getElementById('aguaValue').textContent = aguaVal;
                 document.getElementById('aguaMetaDisplay').textContent = aguaGoal;
-                updateCircle('circleAgua', aguaProgress);
+                document.getElementById('aguaProgress').style.width = clamp((aguaVal / aguaGoal) * 100, 0, 100) + '%';
 
-                // IMC
                 if (userProfile.weight && userProfile.height) {
-                    const imc = calculateIMC(userProfile.weight, userProfile.height);
-                    document.getElementById('imcValue').textContent = imc.toFixed(1);
-                    const classif = getIMCClassification(imc);
-                    const classEl = document.getElementById('imcClass');
-                    classEl.style.display = 'inline-block';
-                    classEl.textContent = classif.label;
-                    classEl.className = 'imc-classification ' + classif.cssClass;
-                    document.getElementById('imcSub').textContent =
-                        `${userProfile.weight} kg • ${userProfile.height} cm`;
+                    healthWorker.postMessage({ type: 'calculateIMC', data: { weight: userProfile.weight, heightCm: userProfile.height } });
+                    document.getElementById('imcValue').textContent = '...';
                 } else {
                     document.getElementById('imcValue').textContent = '--';
                     document.getElementById('imcClass').style.display = 'none';
-                    document.getElementById('imcSub').textContent = 'Toque para calcular';
                 }
 
-                // Caminhada
                 const walkGoal = userProfile.walkGoal;
-                const walked = data.walked || 0;
-                const walkProgress = clamp(walked / walkGoal, 0, 1);
-                document.getElementById('walkValue').textContent = walked;
+                const walkVal = data.walked || 0;
+                document.getElementById('walkValue').textContent = walkVal;
                 document.getElementById('walkMetaDisplay').textContent = walkGoal;
-                document.getElementById('walkProgressBar').style.width = (walkProgress * 100) + '%';
+                document.getElementById('walkProgress').style.width = clamp((walkVal / walkGoal) * 100, 0, 100) + '%';
 
-                // Sono
                 const sleepGoal = userProfile.sleepGoal;
-                const slept = data.sleep || 0;
-                const sleepProgress = clamp(slept / sleepGoal, 0, 1);
-                document.getElementById('sleepValue').textContent = slept;
+                const sleepVal = data.sleep || 0;
+                document.getElementById('sleepValue').textContent = sleepVal;
                 document.getElementById('sleepMetaDisplay').textContent = sleepGoal;
-                document.getElementById('sleepProgressBar').style.width = (sleepProgress * 100) + '%';
+                document.getElementById('sleepProgress').style.width = clamp((sleepVal / sleepGoal) * 100, 0, 100) + '%';
 
-                // Atualizar lista de calorias no modal
-                renderCalEntries();
-                // Atualizar copos de água no modal
-                renderWaterCups();
+                renderGamification();
+                renderAchievementsPage();
+                updateChart();
+                updateSmartGoals();
+                updateStreak();
             }
 
-            function updateCircle(elementId, progress) {
-                const circle = document.getElementById(elementId);
-                const offset = CIRCLE_CIRCUMFERENCE * (1 - progress);
-                circle.setAttribute('stroke-dashoffset', offset);
-                // Pequena mudança de cor quando atinge 100%
-                if (progress >= 1) {
-                    circle.style.opacity = '1';
-                    circle.style.filter = 'drop-shadow(0 0 6px currentColor)';
-                } else {
-                    circle.style.filter = 'none';
-                }
+            async function updateSmartGoals() {
+                const all = await getAllDailyData();
+                healthWorker.postMessage({ type: 'analyzeHistory', data: all });
+            }
+            async function updateChart() {
+                const all = await getAllDailyData();
+                const sorted = all.sort((a, b) => a.date.localeCompare(b.date));
+                const last14 = sorted.slice(-14);
+                const labels = last14.map(d => { const parts = d.date.split('-'); return parts[2] + '/' + parts[1]; });
+                const values = last14.map(d => {
+                    if (currentMetric === 'calories') return d.calories || 0;
+                    if (currentMetric === 'water') return d.water || 0;
+                    if (currentMetric === 'walked') return d.walked || 0;
+                    if (currentMetric === 'sleep') return d.sleep || 0;
+                    return 0;
+                });
+                const colors = {
+                    calories: { bg: 'rgba(14,234,142,0.25)', border: '#0eea8e' },
+                    water: { bg: 'rgba(59,158,255,0.25)', border: '#3b9eff' },
+                    walked: { bg: 'rgba(94,234,219,0.25)', border: '#5eeadb' },
+                    sleep: { bg: 'rgba(185,142,255,0.25)', border: '#b98eff' }
+                };
+                const c = colors[currentMetric] || colors.calories;
+                const ctx = document.getElementById('historyChart').getContext('2d');
+                if (chartInstance) chartInstance.destroy();
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: c.bg,
+                            borderColor: c.border,
+                            borderWidth: 2,
+                            borderRadius: 10,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: '#a0a5b5', font: { size: 10 } } },
+                            x: { grid: { display: false }, ticks: { color: '#a0a5b5', font: { size: 9 } } }
+                        }
+                    }
+                });
             }
 
-            function renderCalEntries() {
-                const data = getDailyData(currentDate);
-                const list = document.getElementById('calEntriesList');
-                const entries = data.calEntries || [];
-                if (entries.length === 0) {
-                    list.innerHTML =
-                        '<li style="color:var(--text3);justify-content:center;font-style:italic;">Nenhuma refeição registrada hoje</li>';
-                } else {
-                    list.innerHTML = entries.map((e, i) => `
-                        <li>
-                            <span>🍽 ${e.label || 'Refeição'} — <strong>${e.amount} kcal</strong></span>
-                            <button class="remove-entry" data-index="${i}" data-type="cal" title="Remover">✕</button>
-                        </li>
-                    `).join('');
-                }
-            }
-
-            function renderWaterCups() {
-                const data = getDailyData(currentDate);
-                const totalWater = data.water || 0;
-                const cupsTotal = Math.ceil(userProfile.waterGoal / 250);
-                const cupsFilled = Math.floor(totalWater / 250);
-                const row = document.getElementById('waterCupsRow');
-                let html = '';
-                for (let i = 0; i < cupsTotal; i++) {
-                    html +=
-                        `<button class="water-cup${i < cupsFilled ? ' filled' : ''}" data-cup-index="${i}" title="${(i+1)*250} ml">${(i+1)*250}</button>`;
-                }
-                row.innerHTML = html;
-            }
-
-            function calculateIMC(weight, heightCm) {
-                const heightM = heightCm / 100;
-                return weight / (heightM * heightM);
-            }
-
-            function getIMCClassification(imc) {
-                if (imc < 18.5) return { label: 'Abaixo do peso', cssClass: 'underweight' };
-                if (imc < 25) return { label: 'Peso normal', cssClass: 'normal' };
-                if (imc < 30) return { label: 'Sobrepeso', cssClass: 'overweight' };
-                return { label: 'Obesidade', cssClass: 'obese' };
-            }
-
-            // ============ AÇÕES ============
-            function addCalories(amount) {
-                const data = getDailyData(currentDate);
+            async function addCalories(amount) {
+                const data = await getDailyData(currentDate);
                 data.calories = (data.calories || 0) + amount;
                 if (!data.calEntries) data.calEntries = [];
-                data.calEntries.push({ amount: amount, label: 'Refeição', time: Date.now() });
-                saveAllData();
-                renderAll();
-                showToast(`✅ +${amount} kcal adicionadas`);
+                data.calEntries.push({ amount, time: Date.now() });
+                await saveDailyData(data);
+                addXP(5);
+                await renderAll();
+                showToast(`✅ +${amount} kcal`);
             }
-
-            function addWater(amount) {
-                const data = getDailyData(currentDate);
+            async function addWater(amount) {
+                const data = await getDailyData(currentDate);
                 data.water = (data.water || 0) + amount;
                 if (!data.waterEntries) data.waterEntries = [];
-                data.waterEntries.push({ amount: amount, time: Date.now() });
-                saveAllData();
-                renderAll();
-                showToast(`💧 +${amount} ml de água`);
+                data.waterEntries.push({ amount, time: Date.now() });
+                await saveDailyData(data);
+                addXP(3);
+                await renderAll();
+                showToast(`💧 +${amount} ml`);
             }
-
-            function addWalked(amount) {
-                const data = getDailyData(currentDate);
+            async function addWalked(amount) {
+                const data = await getDailyData(currentDate);
                 data.walked = (data.walked || 0) + amount;
-                saveAllData();
-                renderAll();
-                showToast(`🚶 +${amount} metros caminhados`);
+                await saveDailyData(data);
+                addXP(10);
+                await renderAll();
+                showToast(`🚶 +${amount} m`);
             }
-
-            function setSleep(hours) {
-                const data = getDailyData(currentDate);
+            async function setSleep(hours) {
+                const data = await getDailyData(currentDate);
                 data.sleep = hours;
-                saveAllData();
-                renderAll();
-                showToast(`😴 Sono definido: ${hours} horas`);
+                await saveDailyData(data);
+                addXP(8);
+                await renderAll();
+                showToast(`😴 ${hours}h de sono`);
             }
-
-            function clearCalories() {
-                const data = getDailyData(currentDate);
-                data.calories = 0;
-                data.calEntries = [];
-                saveAllData();
-                renderAll();
-                showToast('🗑 Calorias do dia zeradas');
+            async function clearCalories() {
+                const data = await getDailyData(currentDate);
+                data.calories = 0; data.calEntries = [];
+                await saveDailyData(data); await renderAll(); showToast('🗑 Calorias zeradas');
             }
-
-            function clearWater() {
-                const data = getDailyData(currentDate);
-                data.water = 0;
-                data.waterEntries = [];
-                saveAllData();
-                renderAll();
-                showToast('🗑 Água do dia zerada');
+            async function clearWater() {
+                const data = await getDailyData(currentDate);
+                data.water = 0; data.waterEntries = [];
+                await saveDailyData(data); await renderAll(); showToast('🗑 Água zerada');
             }
-
-            function clearWalked() {
-                const data = getDailyData(currentDate);
+            async function clearWalked() {
+                const data = await getDailyData(currentDate);
                 data.walked = 0;
-                saveAllData();
-                renderAll();
-                showToast('🗑 Caminhada do dia zerada');
+                await saveDailyData(data); await renderAll(); showToast('🗑 Caminhada zerada');
             }
-
-            function saveIMC(weight, height) {
-                userProfile.weight = weight;
-                userProfile.height = height;
-                saveAllData();
-                renderAll();
-                const imc = calculateIMC(weight, height);
-                const classif = getIMCClassification(imc);
-                showToast(`⚖️ IMC: ${imc.toFixed(1)} — ${classif.label}`);
+            async function saveIMC(weight, height) {
+                userProfile.weight = weight; userProfile.height = height;
+                await saveProfile();
+                healthWorker.postMessage({ type: 'calculateIMC', data: { weight, heightCm: height } });
+                addXP(15); await renderAll();
             }
-
-            function saveMetas(cal, agua, walk, sleep) {
-                userProfile.calorieGoal = cal;
-                userProfile.waterGoal = agua;
-                userProfile.walkGoal = walk;
-                userProfile.sleepGoal = sleep;
-                saveAllData();
-                renderAll();
-                showToast('⚙️ Metas atualizadas!');
+            async function saveMetas(cal, agua, walk, sleep) {
+                userProfile.calorieGoal = cal; userProfile.waterGoal = agua; userProfile.walkGoal = walk; userProfile.sleepGoal = sleep;
+                await saveProfile(); await renderAll(); showToast('⚙️ Metas salvas!');
             }
-
-            function resetAllData() {
-                if (confirm(
-                        'Tem certeza que deseja apagar TODOS os dados? Esta ação não pode ser desfeita.'
-                        )) {
-                    dailyData = {};
-                    userProfile = {
-                        weight: null,
-                        height: null,
-                        calorieGoal: 2000,
-                        waterGoal: 2000,
-                        walkGoal: 5000,
-                        sleepGoal: 8,
-                    };
+            async function resetAll() {
+                if (confirm('Apagar TODOS os dados?')) {
+                    await db.dailyData.clear();
+                    userProfile = { ...defaultProfile };
+                    await saveProfile();
                     currentDate = getTodayStr();
-                    saveAllData();
-                    renderAll();
+                    await renderAll();
                     closeAllModals();
-                    showToast('⚠️ Todos os dados foram resetados');
+                    showToast('⚠️ Dados resetados');
                 }
             }
-
-            function navigateDate(direction) {
+            async function navigateDate(dir) {
                 const parts = currentDate.split('-');
                 const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                d.setDate(d.getDate() + direction);
-                const newDateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d
-                    .getDate()).padStart(2, '0');
-                // Não permitir ir para o futuro
-                const today = getTodayStr();
-                if (newDateStr > today) return;
-                currentDate = newDateStr;
-                getDailyData(currentDate);
-                renderAll();
-                closeAllModals();
+                d.setDate(d.getDate() + dir);
+                const newDate = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                if (newDate > getTodayStr()) return;
+                currentDate = newDate;
+                await renderAll();
+            }
+            function goToToday() { currentDate = getTodayStr(); renderAll(); }
+            function openModal(id) { closeAllModals(); document.getElementById(id).classList.remove('hidden'); }
+            function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+            function closeAllModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); }
+
+            function updateAmoledUI() {
+                const amoledSpan = document.getElementById('amoledThemeOption');
+                if (amoledSpan) {
+                    amoledSpan.style.display = amoledEnabled ? 'inline' : 'none';
+                }
+                // Se amoled for desativado e tema atual for amoled, volta para dark
+                if (!amoledEnabled && document.documentElement.getAttribute('data-theme') === 'amoled') {
+                    setTheme('dark');
+                }
+                // Reaplica destaque do tema ativo
+                highlightActiveTheme();
             }
 
-            function goToToday() {
-                currentDate = getTodayStr();
-                getDailyData(currentDate);
-                renderAll();
-                closeAllModals();
+            function setTheme(theme) {
+                if (theme === 'amoled' && !amoledEnabled) return;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('healthTheme', theme);
+                highlightActiveTheme();
             }
 
-            // ============ MODAIS ============
-            function openModal(modalId) {
-                closeAllModals();
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    // Preencher inputs com valores atuais se aplicável
-                    if (modalId === 'modalIMC') {
-                        document.getElementById('inputPeso').value = userProfile.weight || '';
-                        document.getElementById('inputAltura').value = userProfile.height || '';
-                        document.getElementById('imcResultBox').classList.add('hidden');
+            function highlightActiveTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                document.querySelectorAll('.theme-toggle span').forEach(s => {
+                    s.classList.remove('active');
+                    if (s.getAttribute('data-theme') === currentTheme && s.style.display !== 'none') {
+                        s.classList.add('active');
                     }
-                    if (modalId === 'modalCalorias') {
-                        document.getElementById('inputCalorias').value = '';
-                        document.getElementById('inputCalorias').focus();
-                        renderCalEntries();
-                    }
-                    if (modalId === 'modalAgua') {
-                        document.getElementById('inputAgua').value = '';
-                        renderWaterCups();
-                    }
-                    if (modalId === 'modalCaminhada') {
-                        document.getElementById('inputCaminhada').value = '';
-                        document.getElementById('inputCaminhada').focus();
-                    }
-                    if (modalId === 'modalSono') {
-                        document.getElementById('inputSono').value = getDailyData(currentDate).sleep || '';
-                        document.getElementById('inputSono').focus();
-                    }
-                    if (modalId === 'modalConfig') {
-                        document.getElementById('inputMetaCalorias').value = userProfile.calorieGoal;
-                        document.getElementById('inputMetaAgua').value = userProfile.waterGoal;
-                        document.getElementById('inputMetaCaminhada').value = userProfile.walkGoal;
-                        document.getElementById('inputMetaSono').value = userProfile.sleepGoal;
-                    }
+                });
+                // Caso o tema ativo seja amoled, garantir que o span fique visível e ativo
+                const amoledSpan = document.getElementById('amoledThemeOption');
+                if (currentTheme === 'amoled' && amoledEnabled && amoledSpan) {
+                    amoledSpan.classList.add('active');
                 }
             }
 
-            function closeModal(modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) modal.classList.add('hidden');
+            async function requestNotification() {
+                if (!('Notification' in window)) return showToast('🔕 Navegador não suporta');
+                const perm = await Notification.requestPermission();
+                if (perm === 'granted') { showToast('🔔 Lembretes ativados!'); scheduleReminders(); }
+                else showToast('🔕 Permissão negada');
+            }
+            function scheduleReminders() {
+                if (!('Notification' in window) || Notification.permission !== 'granted') return;
+                const now = new Date();
+                [9, 11, 13, 15, 17].forEach(h => {
+                    const target = new Date(now); target.setHours(h, 0, 0, 0);
+                    if (target > now) setTimeout(() => new Notification('💧 Hora de beber água!', { body: 'Mantenha-se hidratado.', icon: '💧', tag: 'water' }), target - now);
+                });
+                const sleepTarget = new Date(now); sleepTarget.setHours(22, 0, 0, 0);
+                if (sleepTarget > now) setTimeout(() => new Notification('😴 Hora de dormir!', { body: 'Registre suas horas de sono.', icon: '😴', tag: 'sleep' }), sleepTarget - now);
             }
 
-            function closeAllModals() {
-                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
-            }
-
-            // ============ EVENT LISTENERS ============
-            // Cards clicáveis
-            document.getElementById('cardCalorias').addEventListener('click', () => openModal('modalCalorias'));
-            document.getElementById('cardAgua').addEventListener('click', () => openModal('modalAgua'));
-            document.getElementById('cardIMC').addEventListener('click', () => openModal('modalIMC'));
-            document.getElementById('cardCaminhada').addEventListener('click', () => openModal('modalCaminhada'));
-            document.getElementById('cardSono').addEventListener('click', () => openModal('modalSono'));
-
-            // Fechar modais
-            document.querySelectorAll('[data-close]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeModal(btn.getAttribute('data-close'));
-                });
-            });
-            document.querySelectorAll('.modal-overlay').forEach(overlay => {
-                overlay.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        this.classList.add('hidden');
-                    }
-                });
-            });
-
-            // Navegação de datas
+            // Eventos
+            document.querySelectorAll('.card[data-modal]').forEach(c => c.addEventListener('click', () => openModal(c.getAttribute('data-modal'))));
+            document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); closeModal(b.getAttribute('data-close')); }));
+            document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', function(e) { if (e.target === this) this.classList.add('hidden'); }));
             document.getElementById('btnPrevDay').addEventListener('click', () => navigateDate(-1));
             document.getElementById('btnNextDay').addEventListener('click', () => navigateDate(1));
-            document.getElementById('btnGoToday').addEventListener('click', () => goToToday());
-
-            // Modal Calorias
-            document.getElementById('btnAddCalorias').addEventListener('click', () => {
-                const val = parseInt(document.getElementById('inputCalorias').value);
-                if (val && val > 0) {
-                    addCalories(val);
-                    document.getElementById('inputCalorias').value = '';
-                    document.getElementById('inputCalorias').focus();
-                } else {
-                    showToast('⚠️ Digite um valor válido');
-                }
-            });
-            document.getElementById('inputCalorias').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') document.getElementById('btnAddCalorias').click();
-            });
-            document.getElementById('btnClearCalorias').addEventListener('click', () => {
-                if (confirm('Zerar todas as calorias do dia?')) clearCalories();
-            });
-            document.querySelector('#modalCalorias .quick-btns').addEventListener('click', (e) => {
-                if (e.target.classList.contains('quick-btn')) {
-                    const val = parseInt(e.target.getAttribute('data-add'));
-                    if (val) addCalories(val);
-                }
-            });
-            document.getElementById('calEntriesList').addEventListener('click', (e) => {
-                if (e.target.classList.contains('remove-entry')) {
-                    const index = parseInt(e.target.getAttribute('data-index'));
-                    const data = getDailyData(currentDate);
-                    if (data.calEntries && index >= 0 && index < data.calEntries.length) {
-                        const removed = data.calEntries.splice(index, 1)[0];
-                        data.calories = Math.max(0, (data.calories || 0) - removed.amount);
-                        saveAllData();
-                        renderAll();
-                        renderCalEntries();
-                        showToast(`Removido: -${removed.amount} kcal`);
-                    }
-                }
+            document.getElementById('btnGoToday').addEventListener('click', goToToday);
+            document.getElementById('btnOpenSmartGoals').addEventListener('click', () => {
+                updateSmartGoals();
+                openModal('modalSmartGoals');
             });
 
-            // Modal Água
-            document.getElementById('btnAddAgua').addEventListener('click', () => {
-                const val = parseInt(document.getElementById('inputAgua').value);
-                if (val && val > 0) {
-                    addWater(val);
-                    document.getElementById('inputAgua').value = '';
-                } else {
-                    showToast('⚠️ Digite um valor válido');
+            document.getElementById('btnAddCalorias').addEventListener('click', async () => { const v = parseInt(document.getElementById('inputCalorias').value); if (v > 0) { await addCalories(v); document.getElementById('inputCalorias').value = ''; } });
+            document.getElementById('btnClearCalorias').addEventListener('click', () => { if (confirm('Zerar?')) clearCalories(); });
+            document.querySelector('#modalCalorias .quick-btns').addEventListener('click', e => { if (e.target.classList.contains('quick-btn')) addCalories(parseInt(e.target.getAttribute('data-add'))); });
+            document.getElementById('btnAddAgua').addEventListener('click', async () => { const v = parseInt(document.getElementById('inputAgua').value); if (v > 0) { await addWater(v); document.getElementById('inputAgua').value = ''; } });
+            document.getElementById('btnClearAgua').addEventListener('click', () => { if (confirm('Zerar?')) clearWater(); });
+            document.querySelector('#modalAgua .quick-btns').addEventListener('click', e => { if (e.target.classList.contains('quick-btn')) addWater(parseInt(e.target.getAttribute('data-add'))); });
+            document.getElementById('btnCalcIMC').addEventListener('click', async () => { const p = parseFloat(document.getElementById('inputPeso').value); const a = parseFloat(document.getElementById('inputAltura').value); if (p > 0 && a > 0) await saveIMC(p, a); else showToast('⚠️ Preencha corretamente'); });
+            document.getElementById('btnAddCaminhada').addEventListener('click', async () => { const v = parseInt(document.getElementById('inputCaminhada').value); if (v > 0) { await addWalked(v); document.getElementById('inputCaminhada').value = ''; } });
+            document.getElementById('btnClearCaminhada').addEventListener('click', () => { if (confirm('Zerar?')) clearWalked(); });
+            document.querySelector('#modalCaminhada .quick-btns').addEventListener('click', e => { if (e.target.classList.contains('quick-btn')) addWalked(parseInt(e.target.getAttribute('data-add'))); });
+            document.getElementById('btnSetSono').addEventListener('click', async () => { const v = parseFloat(document.getElementById('inputSono').value); if (v >= 0 && v <= 24) { await setSleep(v); closeModal('modalSono'); } });
+            document.querySelector('#modalSono .quick-btns').addEventListener('click', e => { if (e.target.classList.contains('quick-btn')) { const v = parseFloat(e.target.getAttribute('data-add')); document.getElementById('inputSono').value = v; setSleep(v); closeModal('modalSono'); } });
+            document.getElementById('btnSaveMetas').addEventListener('click', async () => await saveMetas(parseInt(document.getElementById('inputMetaCalorias').value) || userProfile.calorieGoal, parseInt(document.getElementById('inputMetaAgua').value) || userProfile.waterGoal, parseInt(document.getElementById('inputMetaCaminhada').value) || userProfile.walkGoal, parseFloat(document.getElementById('inputMetaSono').value) || userProfile.sleepGoal));
+            document.getElementById('btnResetAll').addEventListener('click', resetAll);
+            document.getElementById('btnRequestNotification').addEventListener('click', requestNotification);
+            document.getElementById('btnApplySmartGoals').addEventListener('click', async () => { if (window.suggestedGoals) { const g = window.suggestedGoals; await saveMetas(g.calorieGoal, g.waterGoal, g.walkGoal, g.sleepGoal); document.getElementById('btnApplySmartGoals').style.display = 'none'; closeModal('modalSmartGoals'); showToast('✨ Metas inteligentes aplicadas!'); } });
+            document.getElementById('chartTabs').addEventListener('click', e => {
+                if (e.target.classList.contains('chart-tab')) {
+                    document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentMetric = e.target.getAttribute('data-metric');
+                    updateChart();
                 }
             });
-            document.getElementById('inputAgua').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') document.getElementById('btnAddAgua').click();
-            });
-            document.getElementById('btnClearAgua').addEventListener('click', () => {
-                if (confirm('Zerar toda a água do dia?')) clearWater();
-            });
-            document.getElementById('waterCupsRow').addEventListener('click', (e) => {
-                const cupBtn = e.target.closest('.water-cup');
-                if (cupBtn) {
-                    const index = parseInt(cupBtn.getAttribute('data-cup-index'));
-                    const targetMl = (index + 1) * 250;
-                    const data = getDailyData(currentDate);
-                    const currentMl = data.water || 0;
-                    if (currentMl < targetMl) {
-                        const diff = targetMl - currentMl;
-                        addWater(diff);
-                    } else if (currentMl >= targetMl && index === Math.floor(currentMl / 250) - 1) {
-                        // Remover último copo
-                        const removeAmount = Math.min(250, currentMl);
-                        data.water = Math.max(0, currentMl - removeAmount);
-                        if (data.waterEntries && data.waterEntries.length > 0) data.waterEntries.pop();
-                        saveAllData();
-                        renderAll();
-                        renderWaterCups();
-                        showToast(`💧 -${removeAmount} ml`);
-                    } else {
-                        addWater(250);
-                    }
-                }
-            });
-
-            // Modal IMC
-            document.getElementById('btnCalcIMC').addEventListener('click', () => {
-                const peso = parseFloat(document.getElementById('inputPeso').value);
-                const altura = parseFloat(document.getElementById('inputAltura').value);
-                if (peso && altura && peso > 0 && altura > 0) {
-                    saveIMC(peso, altura);
-                    const imc = calculateIMC(peso, altura);
-                    const classif = getIMCClassification(imc);
-                    document.getElementById('imcResultBox').classList.remove('hidden');
-                    document.getElementById('imcResultNumber').textContent = imc.toFixed(1);
-                    document.getElementById('imcResultNumber').style.color =
-                        classif.cssClass === 'normal' ? 'var(--green)' :
-                        classif.cssClass === 'underweight' ? 'var(--blue)' :
-                        classif.cssClass === 'overweight' ? 'var(--orange)' : 'var(--red)';
-                    document.getElementById('imcResultLabel').textContent = classif.label;
-                } else {
-                    showToast('⚠️ Preencha peso e altura corretamente');
-                }
-            });
-
-            // Modal Caminhada
-            document.getElementById('btnAddCaminhada').addEventListener('click', () => {
-                const val = parseInt(document.getElementById('inputCaminhada').value);
-                if (val && val > 0) {
-                    addWalked(val);
-                    document.getElementById('inputCaminhada').value = '';
-                    document.getElementById('inputCaminhada').focus();
-                } else {
-                    showToast('⚠️ Digite um valor válido');
-                }
-            });
-            document.getElementById('inputCaminhada').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') document.getElementById('btnAddCaminhada').click();
-            });
-            document.getElementById('btnClearCaminhada').addEventListener('click', () => {
-                if (confirm('Zerar caminhada do dia?')) clearWalked();
-            });
-            document.querySelector('#modalCaminhada .quick-btns').addEventListener('click', (e) => {
-                if (e.target.classList.contains('quick-btn')) {
-                    const val = parseInt(e.target.getAttribute('data-add'));
-                    if (val) addWalked(val);
-                }
-            });
-
-            // Modal Sono
-            document.getElementById('btnSetSono').addEventListener('click', () => {
-                const val = parseFloat(document.getElementById('inputSono').value);
-                if (val !== undefined && val !== null && !isNaN(val) && val >= 0 && val <= 24) {
-                    setSleep(val);
-                    closeModal('modalSono');
-                } else {
-                    showToast('⚠️ Digite um valor entre 0 e 24 horas');
-                }
-            });
-            document.getElementById('inputSono').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') document.getElementById('btnSetSono').click();
-            });
-            document.querySelector('#modalSono .quick-btns').addEventListener('click', (e) => {
-                if (e.target.classList.contains('quick-btn')) {
-                    const val = parseFloat(e.target.getAttribute('data-add'));
-                    if (val !== undefined && !isNaN(val)) {
-                        document.getElementById('inputSono').value = val;
-                        setSleep(val);
-                        closeModal('modalSono');
-                    }
-                }
-            });
-
-            // Modal Configurações
-            document.getElementById('btnConfig').addEventListener('click', () => openModal('modalConfig'));
-            document.getElementById('btnSaveMetas').addEventListener('click', () => {
-                const cal = parseInt(document.getElementById('inputMetaCalorias').value) || userProfile
-                    .calorieGoal;
-                const agua = parseInt(document.getElementById('inputMetaAgua').value) || userProfile.waterGoal;
-                const walk = parseInt(document.getElementById('inputMetaCaminhada').value) || userProfile
-                    .walkGoal;
-                const sleep = parseFloat(document.getElementById('inputMetaSono').value) || userProfile.sleepGoal;
-                saveMetas(
-                    clamp(cal, 500, 10000),
-                    clamp(agua, 500, 10000),
-                    clamp(walk, 500, 50000),
-                    clamp(sleep, 2, 16)
-                );
-                closeModal('modalConfig');
-            });
-            document.getElementById('btnResetAll').addEventListener('click', () => resetAllData());
-
-            // Fechar modal com tecla Escape
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') closeAllModals();
-            });
-
-            // ============ INICIALIZAÇÃO ============
-            function init() {
-                loadAllData();
-                currentDate = getTodayStr();
-                getDailyData(currentDate);
-                renderAll();
-                // Fechar todos os modais no início
+            document.querySelectorAll('.bottom-nav button').forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
+                document.getElementById(btn.getAttribute('data-page')).classList.add('active');
                 closeAllModals();
-                console.log('🏥 Health Dashboard inicializado — Todos os dados salvos localmente no navegador.');
-                console.log('📅 Data atual:', formatDate(currentDate));
-                console.log('💾 localStorage key:', STORAGE_KEY);
-                console.log('🔒 Nenhum dado é enviado para servidores externos.');
+                if (btn.getAttribute('data-page') === 'pageAchievements') renderAchievementsPage();
+                if (btn.getAttribute('data-page') === 'pageConfig') {
+                    document.getElementById('inputMetaCalorias').value = userProfile.calorieGoal;
+                    document.getElementById('inputMetaAgua').value = userProfile.waterGoal;
+                    document.getElementById('inputMetaCaminhada').value = userProfile.walkGoal;
+                    document.getElementById('inputMetaSono').value = userProfile.sleepGoal;
+                    document.getElementById('amoledCheckbox').checked = amoledEnabled;
+                }
+            }));
+            document.getElementById('themeToggle').addEventListener('click', (e) => {
+                const span = e.target.closest('span');
+                if (!span) return;
+                const theme = span.getAttribute('data-theme');
+                if (theme) setTheme(theme);
+            });
+
+            document.getElementById('amoledCheckbox').addEventListener('change', function() {
+                amoledEnabled = this.checked;
+                localStorage.setItem('amoledEnabled', amoledEnabled);
+                updateAmoledUI();
+                if (!amoledEnabled) {
+                    setTheme('dark');
+                } else {
+                    // Se acabou de ativar, mantém o tema atual ou sugere amoled
+                    const current = document.documentElement.getAttribute('data-theme');
+                    if (current !== 'amoled') {
+                        // não faz nada, deixa o usuário escolher
+                    }
+                }
+            });
+
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllModals(); });
+
+            if ('serviceWorker' in navigator) {
+                const swCode = `const CACHE='health-v8';self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/'])));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!==CACHE).map(n=>caches.delete(n)))));self.clients.claim();});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{if(resp.status===200){const clone=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,clone));}return resp;})));});self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window'}).then(c=>{if(c.length>0)c[0].focus();else clients.openWindow('/');}));});`;
+                navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' }))).then(() => console.log('SW ok')).catch(() => {});
             }
 
+            async function init() {
+                await loadProfile();
+                currentDate = getTodayStr();
+                await getDailyData(currentDate);
+                // Recupera tema salvo
+                const savedTheme = localStorage.getItem('healthTheme') || 'dark';
+                // Se amoled não está habilitado e tema é amoled, força dark
+                if (!amoledEnabled && savedTheme === 'amoled') {
+                    setTheme('dark');
+                } else {
+                    setTheme(savedTheme);
+                }
+                updateAmoledUI();
+                await renderAll();
+                updateStreak();
+                checkAchievements();
+                if ('Notification' in window && Notification.permission === 'granted') scheduleReminders();
+                // Sincroniza checkbox
+                document.getElementById('amoledCheckbox').checked = amoledEnabled;
+                console.log('🏥 Health Dashboard pronto.');
+            }
             init();
         })();
     </script>
